@@ -1,116 +1,64 @@
-# CoolCode browser tool template
+# Stream Atlas
 
-A starting point for independent tools at `coolcode.ca/<repo>/`: a working local-text
-example, responsive UI, Python standard-library build, Node tests, PR checks and Pages
-publication. No npm install is needed.
-
-## Using the example
+Internet radio discovery for CoolCode. Search any station name, two-letter country code, state/province, language, genre, codec or minimum bitrate. Keep a listening collection and move it between devices with JSON. The app is static, keyless and works at `/streamatlas/`.
 
 <!-- coolcode:guide -->
-The first occurrence of each trimmed line keeps its place. Compare the output with the original text before copying the result.
+Search beyond the starting shelf by station name, country, language or genre; the presets are shortcuts, not a fixed list. Playing connects directly to a station, while saved stations remain in the current tab unless you opt into device storage or export a copy.
 <!-- /coolcode:guide -->
 
-For a real tool, replace this paragraph with one or two plain-text sentences
-about an example, a limit or how to interpret the results. Keep the source,
-coverage, refresh behaviour and a worked example in this README as appropriate.
-When updating a tool, revise any details its behaviour has changed and keep the
-homepage's shorter data-source sentence in `tool.json` accurate.
-The hub imports the marked note into the catalogue README.
+## Using it
 
-## One-time template setup
+- The **retained shelf** opens immediately with genuine Radio Browser metadata and an explicit capture time. It is not a live availability test.
+- **Search directory** sends your chosen fields to Radio Browser and replaces the search view only after success. Pagination fetches additional records. The directory’s click counts determine ordering; they do not measure audio quality.
+- **Filter this view** and **HTTPS streams only** filter the displayed collection locally.
+- **Play** starts one HTTPS stream after an explicit click. The native player supports pause and volume; **Stop** disconnects it. Formats, regional restrictions and station outages can still prevent playback. HLS depends on native browser support. Use the station’s website if playback fails. HTTP streams open externally because this HTTPS page does not embed them.
+- **My stations** saves favourites for this tab. Choose **Remember my stations on this device** only if you want localStorage persistence. JSON export/import transfers up to 500 stations; CSV exports metadata for a spreadsheet. Imports never leave the browser. Clear collection removes this app’s stored collection, not other CoolCode data.
 
-Enable **Settings → General → Template repository** here. This repository does not
-need Pages enabled: its workflow builds/tests but intentionally skips deployment.
-New copies also skip deployment until `scripts/init.py` sets the tool ID to match
-their repository name. This lets you create the repo before configuring Pages.
+## Sources, usage and registration
 
-## Start a new tool
+**No account, API key or GitHub secret is needed.**
 
-1. Select **Use this template → Create a new repository**, choose owner `jsdyer`,
-   a unique lowercase name such as `my-tool`, and public visibility.
-2. Clone the new repository. Use Python 3.12+ and Node 24+.
-3. Set the identity, using a slug that matches the repository name:
+- [Radio Browser API documentation](https://api.radio-browser.info/) permits use in free and non-free software and documents mirror discovery, randomization and listening-click reporting.
+- [Provider reference](https://de1.api.radio-browser.info/) documents advanced station search, stream fields and check timestamps.
+- [Radio Browser](https://www.radio-browser.info/) dedicates its accumulated directory metadata to the public domain. Stream audio and station websites remain the property of their respective owners. This application stores metadata and links only; it does not download, record or proxy audio.
+
+On 2026-11-23 the official HTTPS `/json/servers` and `/json/stations/search` endpoints returned HTTP 200 and `Access-Control-Allow-Origin: *` for a CoolCode Origin. `web/data/stations.json` includes each actual collection request, its returned count and a UTC capture time. `lastchecktime_iso8601` is the provider’s earlier check time, not the collection time. Language, tags, locations, stream URLs and bitrate are community metadata and may be incomplete or stale.
+
+The official [browser discovery example](https://api.radio-browser.info/examples/serverlist-browser.js) explains why HTTPS browser clients bootstrap with a known server, then request `/json/servers`. This app follows that approach, deduplicates server hostnames and shuffles the advertised list. It tries another advertised mirror only for ordinary network/server failures. HTTP 401/403/429, reported challenges and non-JSON responses stop retries; the app keeps the previous results. It does not solve or bypass bot challenges.
+
+A `/json/url/{stationuuid}` request reports each deliberate playback start (or HTTP external-stream click), as requested by the provider. The directory deduplicates same-station clicks from the same IP per day. The Python collector sends a descriptive `User-Agent`. Browsers control their own `User-Agent`; the static app keeps the browser’s normal agent and sends its normal origin instead of pretending a custom agent is reliably set. No special key or proxy is required for these documented public endpoints.
+
+## Expand or customize
+
+Edit **`web/config.json`**, not application code:
+
+| Setting | What it controls |
+| --- | --- |
+| `defaultCountry` | Initial search country, or an empty string for worldwide. |
+| `countrySuggestions` | Helpful datalist suggestions. Any valid two-letter code is accepted even if absent. |
+| `presets` | Quick searches. Add a `label` and any `name`, `countrycode`, `state`, `language`, `tag`, `codec` or `bitrateMin` values. |
+| `pageSize` | Directory page size (the application bounds requests to 1–100). |
+| `retainedQueries` | Searches used to refresh the starting shelf; add any query with `limit` from 1–100. |
+| `bootstrapServers` | Official HTTPS Radio Browser bootstrap hosts. Use currently advertised provider servers, not third-party proxies. |
+| `requestTimeoutMs`, `maxServerAttempts` | Per-request timeout and bounded mirror attempts. |
+
+For example, add `{"label":"New Zealand experimental","countrycode":"NZ","tag":"experimental"}` to `presets`. Add `{"countrycode":"NZ","tag":"experimental","limit":12}` to `retainedQueries` if that search should also appear in the retained shelf.
+
+Refresh and publish:
 
 ```sh
-python3 scripts/init.py my-tool --title "My Tool" --description "Describe what this tool does."
-```
-
-Review the category, tags and icon in `tool.json`. `access: "browser"` tells the main
-catalogue that the tool works immediately without installation. `--owner` supports a different
-GitHub owner, but only projects owned by `jsdyer` inherit the CoolCode domain.
-
-4. Replace the example in `web/` and its tests. Update the privacy explanation,
-   source attribution and README to describe the real tool.
-5. Test and preview:
-
-```sh
+python3 scripts/refresh.py
 node --test tests/*.test.mjs
 python3 -m unittest discover -s tests -v
 python3 scripts/build.py
-python3 -m http.server 8000 --directory dist
 ```
 
-Open `http://localhost:8000/`. The example trims lines, skips blanks and removes exact
-duplicates, preserving first-seen order and capitalization. It processes the text in tab memory. Update that explanation if your app behaves differently.
+Review `web/data/stations.json`, then commit the config/source/data changes and push `main`. The Pages workflow tests, builds and publishes. Changes to presets are visible after deployment; changes to `retainedQueries` require running the refresh command as well. The normal build is offline and **does not silently refresh station data**. There is no background polling, periodic playback or scheduled collector. The refresh script validates every response before atomically replacing the shelf; a failed refresh leaves the last good file intact. Git history preserves previous committed shelves.
 
-CI also tests the browser flow and mobile layout at a project subpath. Replace the
-sample assertions in `tests/browser_smoke.py` when implementing your own UI. To run
-that check locally (optional for ordinary preview):
+## Privacy
 
-```sh
-python3 -m venv .venv
-. .venv/bin/activate
-python3 -m pip install -r tests/browser-requirements.txt
-python3 -m playwright install --with-deps chromium
-python3 tests/browser_smoke.py
-```
+Directory searches reveal the submitted search fields and your IP to Radio Browser. The station receives your IP when you play or follow its links. A playback-click request goes to Radio Browser. No third-party station icons load in the results, and streams use `preload="none"`. Search and listening state are not persisted. Only explicit **Remember** consent stores `coolcode:streamatlas:favourites:v1` on this device; paths on CoolCode share an origin, so the storage key is namespaced. Downloads are local and opt-in. The shared CoolCode visit-counter script may collect aggregate page visits; this app does not send it search queries or station collections.
 
-Playwright is a test-only dependency; the app and its static build do not use it.
+## Development checks
 
-## Publish and register
-
-When the actual tool is ready, in the **new tool repository** set **Settings → Pages → Build and deployment →
-Source → GitHub Actions**. Push to `main`, or manually run **Browser tool · Check and
-publish** after enabling Pages. If the initial deployment ran before Pages was enabled,
-enable it and rerun. PRs only check/build and provide a downloadable preview artifact.
-
-Keep `{{VISIT_COUNTER}}` in the page head and `{{ISSUE_LINK}}` in the footer when replacing the starter UI. The build enables these for initialized CoolCode repositories. The shared counter records aggregate opens on coolcode.ca by public tool ID. Toolbox inputs and URL parameters are excluded. The issue link opens a reporting form with the tool already selected.
-
-Keep app-owned asset paths and module imports relative. Check `https://coolcode.ca/my-tool/`.
-Do not add a CNAME or set `coolcode.ca` as this project's custom domain; the account
-site supplies it. Only successful `main` builds deploy.
-
-After verifying the app, copy the reviewed object from `tool.json` into `data/tools.json`
-in [the main site](https://github.com/jsdyer/jsdyer.github.io). Each tool still builds
-independently. Update the hub record when listing metadata changes; the hub is the
-authority for discovery. Ordinary app updates touch only this repository.
-
-The main site separates **Use in your browser** from **Install yourself**. An app
-that asks for a file is still a browser tool. Standalone Linux packages should start
-in their own repositories with their own build/release workflow, rather than copying
-this browser-only scaffold. Their hub record uses `access: "install"`, links to an
-installation guide, and includes `requirements`.
-
-## Files
-
-| Path | Purpose |
-| --- | --- |
-| `tool.json` | Page metadata and a ready-to-copy catalogue record |
-| `web/` | HTML, responsive CSS, DOM interactions and separate model logic |
-| `scripts/build.py` | Escape metadata and build `web/` into `dist/` |
-| `scripts/init.py` | Set a new project's identity |
-| `tests/` | Application and builder tests |
-| `.github/workflows/pages.yml` | Check PRs and publish successful main builds |
-| `AGENTS.md` | Instructions for future coding work |
-
-Namespace optional storage as `coolcode:<tool-id>:<key>`; CoolCode paths share a
-browser origin. Don't save pasted text/uploads by default. Document external APIs
-and send only the information needed for the selected action. Never embed secrets.
-
-Scheduled refresh is opt-in. Validate source data before deploying, display its date,
-and preserve the last good deployment on failure. Public-repository schedules can
-stop after 60 days without repository activity.
-
-Templates don't propagate future edits automatically. Adopt fixes explicitly and
-consider a versioned reusable workflow once several tools confirm the shared process.
-Choose and add the intended software license before distributing a new project.
+No runtime package dependencies. Node tests cover arbitrary queries, URL handling, import validation, CSV injection defence, mirror discovery, access-block handling, retry rules and capture provenance. Python tests cover build isolation, atomic refresh, failures and configuration expansion. CI additionally runs `tests/browser_smoke.py` in Chromium with directory and media responses mocked; it checks search, retained data, no autoplay, opt-in persistence, filtering, safe DOM text and a 390px viewport. CI screenshots are artifacts, and real streaming is not part of automated tests.

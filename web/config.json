@@ -1,0 +1,25 @@
+{
+  "bootstrapServers": ["https://de1.api.radio-browser.info"],
+  "requestTimeoutMs": 12000,
+  "maxServerAttempts": 3,
+  "pageSize": 24,
+  "defaultCountry": "CA",
+  "countrySuggestions": ["CA", "US", "GB", "FR", "DE", "JP", "BR", "AU", "NZ", "ZA"],
+  "presets": [
+    {"label":"Across Canada", "countrycode":"CA"},
+    {"label":"West coast", "countrycode":"CA", "state":"British Columbia"},
+    {"label":"Atlantic airwaves", "countrycode":"CA", "state":"Nova Scotia"},
+    {"label":"Jazz, anywhere", "tag":"jazz"},
+    {"label":"World of talk", "tag":"talk"},
+    {"label":"After-hours ambient", "tag":"ambient"}
+  ],
+  "retainedQueries": [
+    {"countrycode":"CA", "state":"British Columbia", "limit":8},
+    {"countrycode":"CA", "state":"Nova Scotia", "limit":6},
+    {"countrycode":"CA", "tag":"jazz", "limit":4},
+    {"countrycode":"GB", "tag":"community", "limit":4},
+    {"countrycode":"FR", "tag":"jazz", "limit":4},
+    {"countrycode":"JP", "limit":4},
+    {"tag":"ambient", "limit":4}
+  ]
+}

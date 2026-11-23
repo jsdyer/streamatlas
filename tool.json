@@ -1,16 +1,22 @@
 {
-  "id": "coolcode-tool-template",
-  "title": "CoolCode Tool Starter",
-  "description": "A browser-only example that trims lines and removes exact duplicates.",
-  "category": "security",
-  "tags": ["text", "lines", "duplicates"],
-  "icon": "scan-search",
-  "url": "/coolcode-tool-template/",
-  "source": "https://github.com/jsdyer/coolcode-tool-template",
+  "id": "streamatlas",
+  "title": "Stream Atlas",
+  "description": "Find internet radio across countries, languages and genres, then build your own listening collection.",
+  "category": "media",
+  "tags": [
+    "radio",
+    "music",
+    "canada",
+    "streaming",
+    "discovery"
+  ],
+  "icon": "radio-tower",
+  "url": "/streamatlas/",
+  "source": "https://github.com/jsdyer/streamatlas",
   "hosting": "project",
   "access": "browser",
   "data_info": {
-    "mode": "local",
-    "detail": "The browser reads the text you paste and compares its lines."
+    "mode": "mixed",
+    "detail": "Radio Browser supplies station metadata, with a dated starting collection and live directory searches."
   }
 }

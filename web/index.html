@@ -1,34 +1,42 @@
 <!doctype html>
-<html lang="en-CA">
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="{{DESCRIPTION}}">
-  <title>{{TITLE}} · CoolCode</title>
-  <link rel="stylesheet" href="./style.css">
-  <script type="module" src="./app.mjs"></script>
-  {{VISIT_COUNTER}}
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{TITLE}} · CoolCode</title><meta name="description" content="{{DESCRIPTION}}"><meta name="color-scheme" content="light">
+<link rel="stylesheet" href="./style.css">
+{{VISIT_COUNTER}}
+<script type="module" src="./app.mjs"></script>
 </head>
-<body data-tool-id="{{TOOL_ID}}">
-  <a class="skip" href="#main">Skip to content</a>
-  <header><a href="https://coolcode.ca/">← CoolCode.ca</a><a href="{{SOURCE_URL}}">Source &amp; instructions ↗</a></header>
-  <main id="main">
-    <p class="eyebrow">Browser tool starter</p>
-    <h1>{{TITLE}}</h1>
-    <p class="intro">{{DESCRIPTION}}</p>
-    <section aria-labelledby="example-title">
-      <h2 id="example-title">Clean a list</h2>
-      <p>Trim spaces, skip blank lines and remove exact duplicates. Capitalization stays distinct.</p>
-      <div class="panels">
-        <div><label for="input">Your lines</label><textarea id="input" rows="10" maxlength="100000" spellcheck="false" placeholder="Paste one item per line"></textarea></div>
-        <div><label for="output">Cleaned lines</label><textarea id="output" rows="10" readonly spellcheck="false"></textarea></div>
-      </div>
-      <div class="actions"><button id="sample" type="button">Load example</button><button id="clear" type="button">Clear</button><button id="copy" type="button" hidden>Copy result</button></div>
-      <p id="status" role="status" aria-live="polite">Paste a list to begin.</p>
-      <noscript><p>This tool needs JavaScript to process your text. The source is available above.</p></noscript>
-    </section>
-    <aside aria-label="Privacy"><strong>Stays on your device.</strong> The browser processes your text in this tab. Reloading clears it.</aside>
-  </main>
-  <footer>Part of <a href="https://coolcode.ca/">the CoolCode collection</a>. {{ISSUE_LINK}}</footer>
+<body data-tool="{{TOOL_ID}}">
+<a class="skip" href="#search">Skip to station search</a>
+<header class="topbar"><a class="brand" href="https://coolcode.ca/">CoolCode<span>.ca</span></a><a href="#about">Sources & listening notes <span aria-hidden="true">↗</span></a></header>
+<main>
+<section class="hero" aria-labelledby="title">
+<div><p class="eyebrow"><span class="signal-dot"></span> OPEN FREQUENCIES / WORLDWIDE</p><h1 id="title">Stream<span>Atlas.</span></h1><p class="intro">A different place.<br>A familiar sound.</p><p class="hero-description">Find independent voices, local airwaves and late-night discoveries. Tune in from Canada to everywhere.</p></div>
+<div class="radio-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit orbit-three"></div><div class="art-center">SA<span>LISTEN FURTHER</span></div><div class="art-coordinate top">49.10° N / 122.66° W</div><div class="art-coordinate bottom">44.65° N / 63.57° W</div><span class="art-marker marker-a"></span><span class="art-marker marker-b"></span><div class="frequency-bars"></div></div>
+</section>
+<section class="explorer" aria-labelledby="search-title">
+<div class="section-heading"><div><p class="eyebrow">01 / FIND YOUR FREQUENCY</p><h2 id="search-title">Where do you want to listen?</h2></div><a href="https://www.radio-browser.info/" target="_blank" rel="noopener noreferrer">Powered by Radio Browser ↗</a></div>
+<form id="search">
+<div class="search-grid"><label class="name-field">Station name<input id="name" name="name" maxlength="120" placeholder="CBC, community radio, your favourite station…"></label><label>Country code<input id="countrycode" name="countrycode" list="countries" maxlength="2" placeholder="Any / CA" autocomplete="off"><datalist id="countries"></datalist></label><label>Language<input id="language" name="language" maxlength="120" placeholder="Any language"></label><label>Genre or tag<input id="tag" name="tag" maxlength="120" placeholder="Jazz, news, ambient…"></label></div>
+<div class="search-bottom"><details class="more-filters"><summary>More filters <span aria-hidden="true">+</span></summary><div class="extra-fields"><label>Province / state<input id="state" maxlength="120" placeholder="British Columbia"></label><label>Codec<input id="codec" list="codecs" maxlength="120" placeholder="Any codec"><datalist id="codecs"><option>MP3</option><option>AAC</option><option>OGG</option><option>OPUS</option><option>FLAC</option></datalist></label><label>Minimum kbps<input id="bitrateMin" type="number" min="0" max="1000000" value="0"></label><label class="check"><input type="checkbox" id="hidebroken" checked> Directory last check passed</label></div></details><button class="primary" id="search-button" type="submit">Search directory <span aria-hidden="true">↗</span></button></div>
+</form>
+<p class="micro">Blank fields explore the world. Use any two-letter country code, not only the suggestions. Searches contact Radio Browser; playing contacts the station.</p>
+<div id="presets" class="presets" aria-label="Quick directory searches"></div>
+</section>
+<section class="results-section" aria-labelledby="results-heading">
+<div class="results-nav"><div class="tabs" aria-label="Station views"><button id="show-shelf" class="active" aria-pressed="true">Retained shelf</button><button id="show-live" aria-pressed="false">Search results</button><button id="show-saved" aria-pressed="false">My stations <span id="saved-count">0</span></button></div><label class="check"><input id="httpsOnly" type="checkbox"> HTTPS streams only</label></div>
+<div class="results-title"><div><h2 id="results-heading">A place to start</h2><p id="capture-note" class="muted">Loading retained station metadata…</p></div><div class="count-label"><strong id="result-count">—</strong><span>stations shown</span></div></div>
+<div id="collection-tools" hidden><div class="collection-controls"><label class="check"><input id="remember" type="checkbox"> Remember my stations on this device</label><button id="export-json" class="small">Export JSON</button><button id="export-csv" class="small">Export CSV</button><label class="file-button small">Import JSON<input id="import-json" type="file" accept="application/json,.json"></label><button id="clear-saved" class="small">Clear collection</button></div><p class="micro">Your collection stays in this tab unless you choose to remember it or download a copy. Imports stay in your browser.</p></div>
+<div class="result-toolbar"><label>Filter this view<input id="local-filter" placeholder="Station, place or tag…"></label><a href="https://www.radio-browser.info/search" target="_blank" rel="noopener noreferrer">Open full directory ↗</a></div>
+<p id="status" role="status" aria-live="polite"></p>
+<div id="stations" class="stations"></div>
+<div id="empty" class="empty" hidden><span aria-hidden="true">◎</span><h3>No stations in this view</h3><p id="empty-copy">Try fewer filters, or search the directory for a different place or sound.</p></div>
+<button id="load-more" class="more-button" hidden>Load more directory results</button>
+</section>
+<section id="about" class="about"><div><p class="eyebrow">02 / BEHIND THE DIAL</p><h2>Open directory.<br>Your own collection.</h2></div><div class="notes"><h3>Station metadata, not a live guarantee</h3><p>Radio Browser is a community-maintained directory. Its last check, location, genre and bitrate can be incomplete or out of date. The retained shelf is a dated starting point; directory search reaches beyond it. A listed station can be offline or unavailable in your region.</p><h3>Press play when you’re ready</h3><p>No audio starts automatically. Play connects directly to a station’s HTTPS stream and reports a station click to Radio Browser. HTTP-only streams open outside this page. Some formats, HLS playlists or geographic restrictions may require the station’s own player. No audio is recorded or proxied here.</p><h3>Privacy & sources</h3><p>Search words go to Radio Browser. Playing reveals your IP address to the station and its stream host. Your station collection is not saved between visits unless you opt in. Radio Browser publishes its <a href="https://www.radio-browser.info/" target="_blank" rel="noopener noreferrer">directory metadata as public domain</a>; the stations retain rights in their broadcasts. <a href="https://api.radio-browser.info/" target="_blank" rel="noopener noreferrer">API documentation</a>.</p><p>CoolCode’s shared visit counter may record aggregate visits. The application does not send your collection to CoolCode. You can expand the country suggestions, quick searches and retained shelf in the repository’s <a href="{{SOURCE_URL}}/blob/main/web/config.json" target="_blank" rel="noopener noreferrer">editable config</a>.</p></div></section>
+</main>
+<footer><a href="https://coolcode.ca/">CoolCode.ca</a><span>Stay curious. Keep listening.</span><a href="{{SOURCE_URL}}" target="_blank" rel="noopener noreferrer">Source code</a>{{ISSUE_LINK}}</footer>
+<aside class="player" aria-label="Radio player"><div class="player-icon" aria-hidden="true">◉</div><div class="player-info"><span class="eyebrow" id="player-label">READY WHEN YOU ARE</span><strong id="playing-title">Choose a station to tune in</strong><span id="playing-status">Audio starts only after you press Play.</span></div><audio id="audio" controls preload="none" aria-label="Selected radio stream"></audio><button id="stop" class="small" disabled>Stop</button><a id="player-home" hidden target="_blank" rel="noopener noreferrer">Station website ↗</a></aside>
 </body>
 </html>
