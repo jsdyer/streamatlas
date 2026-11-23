@@ -11,11 +11,21 @@ from urllib.parse import parse_qs, urlsplit
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
+AXE = ROOT / 'node_modules' / 'axe-core' / 'axe.min.js'
 ROW = {'stationuuid':'01234567-89ab-cdef-0123-456789abcdef','name':'<img src=x onerror="alert(1)"> Wellington','url_resolved':'https://stream.example.org/live','homepage':'https://example.org/','countrycode':'NZ','state':'Wellington','language':'english','tags':'experimental,jazz','codec':'MP3','bitrate':128,'lastcheckok':1,'lastchecktime_iso8601':'2026-11-23T00:00:00Z'}
 
 class QuietHandler(SimpleHTTPRequestHandler):
     def log_message(self, *args):
         pass
+
+def check_accessibility(page, state):
+    page.add_script_tag(path=str(AXE))
+    result = page.evaluate("""async () => await axe.run(document, {
+      runOnly: {type: 'rule', values: ['color-contrast', 'label-content-name-mismatch', 'aria-prohibited-attr']}
+    })""")
+    failures = [{'rule': rule['id'], 'targets': [node['target'] for node in rule['nodes']]} for rule in result['violations']]
+    assert not failures, {'state': state, 'failures': failures}
+    assert not [rule for rule in result['incomplete'] if rule['id'] == 'aria-prohibited-attr'], {'state': state, 'incomplete': 'ARIA group naming'}
 
 def main():
     screenshots = ROOT / 'browser-checks'
@@ -62,8 +72,12 @@ def main():
                 assert page.evaluate('window.mediaStarts') == 0
                 assert not requests, requests
                 assert page.evaluate('localStorage.length') == 0
+                assert page.locator('.save').first.get_attribute('aria-label').startswith('Add to my stations: ')
+                check_accessibility(page, 'desktop unsaved shelf')
                 page.locator('.save').first.click()
                 assert page.locator('#saved-count').inner_text()=='1'
+                assert page.locator('.save').first.get_attribute('aria-label').startswith('In my stations: ')
+                check_accessibility(page, 'desktop saved toggle')
                 assert page.evaluate('localStorage.length')==0
                 page.locator('#show-saved').click()
                 assert page.locator('.station').count()==1
@@ -100,6 +114,7 @@ def main():
                 page.screenshot(path=str(screenshots/'desktop.png'), full_page=True)
                 page.set_viewport_size({'width':390,'height':844})
                 assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+                check_accessibility(page, 'mobile shelf')
                 page.screenshot(path=str(screenshots/'mobile.png'), full_page=True)
                 assert not errors, errors
                 browser.close()

@@ -87,8 +87,12 @@ function card(station, index) {
   node.append(foot);
   const actions = el('div', undefined, 'station-actions');
   const isSaved = saved.some(s => s.stationuuid === station.stationuuid);
-  const save = el('button', isSaved ? '✓ In my stations' : '+ Add to my stations', 'save');
-  save.setAttribute('aria-pressed', String(isSaved)); save.setAttribute('aria-label', `${isSaved ? 'Remove' : 'Save'} ${station.name}`);
+  const saveLabel = isSaved ? 'In my stations' : 'Add to my stations';
+  const save = el('button', undefined, 'save');
+  const saveIcon = el('span', isSaved ? '✓ ' : '+ '); saveIcon.setAttribute('aria-hidden', 'true');
+  save.append(saveIcon, document.createTextNode(saveLabel));
+  save.setAttribute('aria-pressed', String(isSaved));
+  save.setAttribute('aria-label', `${saveLabel}: ${station.name}${isSaved ? '; remove from my stations' : ''}`);
   save.addEventListener('click', () => saveStation(station)); actions.append(save);
   if (station.homepage) actions.append(link('Station website ↗', station.homepage));
   node.append(actions);

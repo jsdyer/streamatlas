@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{{TITLE}} · CoolCode</title><meta name="description" content="{{DESCRIPTION}}"><meta name="color-scheme" content="light">
-<link rel="stylesheet" href="./style.css">
+<link rel="stylesheet" href="./style.css?v=accessibility-1">
 {{VISIT_COUNTER}}
-<script type="module" src="./app.mjs"></script>
+<script type="module" src="./app.mjs?v=accessibility-1"></script>
 </head>
 <body data-tool="{{TOOL_ID}}">
 <a class="skip" href="#search">Skip to station search</a>
@@ -22,10 +22,10 @@
 <div class="search-bottom"><details class="more-filters"><summary>More filters <span aria-hidden="true">+</span></summary><div class="extra-fields"><label>Province / state<input id="state" maxlength="120" placeholder="British Columbia"></label><label>Codec<input id="codec" list="codecs" maxlength="120" placeholder="Any codec"><datalist id="codecs"><option>MP3</option><option>AAC</option><option>OGG</option><option>OPUS</option><option>FLAC</option></datalist></label><label>Minimum kbps<input id="bitrateMin" type="number" min="0" max="1000000" value="0"></label><label class="check"><input type="checkbox" id="hidebroken" checked> Directory last check passed</label></div></details><button class="primary" id="search-button" type="submit">Search directory <span aria-hidden="true">↗</span></button></div>
 </form>
 <p class="micro">Blank fields explore the world. Use any two-letter country code, not only the suggestions. Searches contact Radio Browser; playing contacts the station.</p>
-<div id="presets" class="presets" aria-label="Quick directory searches"></div>
+<div id="presets" class="presets" role="group" aria-label="Quick directory searches"></div>
 </section>
 <section class="results-section" aria-labelledby="results-heading">
-<div class="results-nav"><div class="tabs" aria-label="Station views"><button id="show-shelf" class="active" aria-pressed="true">Retained shelf</button><button id="show-live" aria-pressed="false">Search results</button><button id="show-saved" aria-pressed="false">My stations <span id="saved-count">0</span></button></div><label class="check"><input id="httpsOnly" type="checkbox"> HTTPS streams only</label></div>
+<div class="results-nav"><div class="tabs" role="group" aria-label="Station views"><button id="show-shelf" class="active" aria-pressed="true">Retained shelf</button><button id="show-live" aria-pressed="false">Search results</button><button id="show-saved" aria-pressed="false">My stations <span id="saved-count">0</span></button></div><label class="check"><input id="httpsOnly" type="checkbox"> HTTPS streams only</label></div>
 <div class="results-title"><div><h2 id="results-heading">A place to start</h2><p id="capture-note" class="muted">Loading retained station metadata…</p></div><div class="count-label"><strong id="result-count">—</strong><span>stations shown</span></div></div>
 <div id="collection-tools" hidden><div class="collection-controls"><label class="check"><input id="remember" type="checkbox"> Remember my stations on this device</label><button id="export-json" class="small">Export JSON</button><button id="export-csv" class="small">Export CSV</button><label class="file-button small">Import JSON<input id="import-json" type="file" accept="application/json,.json"></label><button id="clear-saved" class="small">Clear collection</button></div><p class="micro">Your collection stays in this tab unless you choose to remember it or download a copy. Imports stay in your browser.</p></div>
 <div class="result-toolbar"><label>Filter this view<input id="local-filter" placeholder="Station, place or tag…"></label><a href="https://www.radio-browser.info/search" target="_blank" rel="noopener noreferrer">Open full directory ↗</a></div>
