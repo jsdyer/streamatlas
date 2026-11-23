@@ -2,6 +2,7 @@
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 import json
+import re
 from pathlib import Path
 import shutil
 import tempfile
@@ -26,8 +27,11 @@ def main():
         try:
             with sync_playwright() as p:
                 browser = p.chromium.launch()
-                page = browser.new_page(viewport={'width':1280,'height':1000})
-                errors, requests = [], []
+                context = browser.new_context(viewport={'width':1280,'height':1000}, service_workers='block')
+                page = context.new_page()
+                errors, requests, observed_requests, observed_responses = [], [], [], []
+                page.on('request', lambda request: observed_requests.append({'url':request.url,'method':request.method}) if request.url.startswith('https://') else None)
+                page.on('response', lambda response: observed_responses.append({'url':response.url,'status':response.status}) if response.url.startswith('https://') else None)
                 page.on('pageerror', lambda error: errors.append(str(error)))
                 page.add_init_script('''
                   window.mediaStarts = 0;
@@ -49,7 +53,9 @@ def main():
                         route.fulfill(json={'ok':True,'stationuuid':ROW['stationuuid'],'url':ROW['url_resolved']}, headers={'Access-Control-Allow-Origin':'*'})
                     else:
                         route.abort()
-                page.route('https://**',network)
+                # Route the whole context with an explicit URL regex; every external request
+                # must be handled here, never allowed to reach a real provider in CI.
+                context.route(re.compile(r'^https://'), network)
                 page.goto(f'http://127.0.0.1:{server.server_port}/streamatlas/')
                 page.locator('.station').first.wait_for()
                 assert page.locator('.station').count() > 10
@@ -69,15 +75,18 @@ def main():
                 page.locator('#countrycode').fill('NZ')
                 page.locator('#search-button').click()
                 page.wait_for_function("!document.querySelector('#search-button').disabled")
-                diagnostics = {'status': page.locator('#status').inner_text(), 'heading': page.locator('#results-heading').inner_text(), 'count': page.locator('#result-count').inner_text(), 'requests': requests, 'errors': errors}
+                diagnostics = {'status': page.locator('#status').inner_text(), 'heading': page.locator('#results-heading').inner_text(), 'count': page.locator('#result-count').inner_text(), 'requests': requests, 'observed_requests': observed_requests, 'observed_responses': observed_responses, 'errors': errors}
                 print('Mocked search diagnostics:', json.dumps(diagnostics), flush=True)
                 page.screenshot(path=str(screenshots/'mocked-search.png'), full_page=True)
+                assert len([url for url in requests if '/json/servers' in url]) == 1, diagnostics
+                assert len([url for url in requests if '/json/stations/search' in url]) == 1, diagnostics
                 assert page.locator('#results-heading').inner_text() == 'Beyond the familiar', diagnostics
                 assert page.locator('.station').count() == 1, diagnostics
                 assert 'Wellington' in page.locator('.station h3').inner_text()
                 assert page.locator('.station img').count()==0
                 assert page.evaluate('window.mediaStarts')==0
-                page.locator('.play').click()
+                with page.expect_response(re.compile(r'/json/url/')):
+                    page.locator('.play').click()
                 assert page.evaluate('window.mediaStarts')==1
                 assert page.locator('#player-label').inner_text()=='NOW LISTENING'
                 page.wait_for_function("document.querySelector('#audio').hasAttribute('src')")
