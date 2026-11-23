@@ -39,14 +39,14 @@ def main():
                     url = route.request.url
                     requests.append(url)
                     if '/json/servers' in url:
-                        route.fulfill(json=[{'name':'de1.api.radio-browser.info'}])
+                        route.fulfill(json=[{'name':'de1.api.radio-browser.info'}], headers={'Access-Control-Allow-Origin':'*'})
                     elif '/json/stations/search' in url:
                         params=parse_qs(urlsplit(url).query)
                         assert params['countrycode']==['NZ']
                         assert params['name']==['Anything & more']
-                        route.fulfill(json=[ROW])
+                        route.fulfill(json=[ROW], headers={'Access-Control-Allow-Origin':'*'})
                     elif '/json/url/' in url:
-                        route.fulfill(json={'ok':True,'stationuuid':ROW['stationuuid'],'url':ROW['url_resolved']})
+                        route.fulfill(json={'ok':True,'stationuuid':ROW['stationuuid'],'url':ROW['url_resolved']}, headers={'Access-Control-Allow-Origin':'*'})
                     else:
                         route.abort()
                 page.route('https://**',network)
@@ -68,7 +68,12 @@ def main():
                 page.locator('#name').fill('Anything & more')
                 page.locator('#countrycode').fill('NZ')
                 page.locator('#search-button').click()
-                page.wait_for_function("document.querySelector('#results-heading').textContent === 'Beyond the familiar'")
+                page.wait_for_function("!document.querySelector('#search-button').disabled")
+                diagnostics = {'status': page.locator('#status').inner_text(), 'heading': page.locator('#results-heading').inner_text(), 'count': page.locator('#result-count').inner_text(), 'requests': requests, 'errors': errors}
+                print('Mocked search diagnostics:', json.dumps(diagnostics), flush=True)
+                page.screenshot(path=str(screenshots/'mocked-search.png'), full_page=True)
+                assert page.locator('#results-heading').inner_text() == 'Beyond the familiar', diagnostics
+                assert page.locator('.station').count() == 1, diagnostics
                 assert 'Wellington' in page.locator('.station h3').inner_text()
                 assert page.locator('.station img').count()==0
                 assert page.evaluate('window.mediaStarts')==0
