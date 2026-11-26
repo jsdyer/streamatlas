@@ -100,7 +100,7 @@ def main():
                 assert page.locator('.station img').count()==0
                 assert page.evaluate('window.mediaStarts')==0
                 with page.expect_response(re.compile(r'/json/url/')):
-                    page.locator('.play').click()
+                    page.locator('.station .play').click()
                 assert page.evaluate('window.mediaStarts')==1
                 assert page.locator('#player-label').inner_text()=='NOW LISTENING'
                 page.wait_for_function("document.querySelector('#audio').hasAttribute('src')")
@@ -114,6 +114,24 @@ def main():
                 page.screenshot(path=str(screenshots/'desktop.png'), full_page=True)
                 page.set_viewport_size({'width':390,'height':844})
                 assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+                for width, height in ((1365,850), (390,844)):
+                    page.set_viewport_size({'width':width,'height':height})
+                    page.evaluate("document.documentElement.style.scrollBehavior='auto'; window.scrollTo(0,0)")
+                    picker = page.locator('#quick-station')
+                    assert picker.locator('option').count() == page.locator('.station').count()
+                    uuid = page.evaluate("""async () => (await (await fetch('./data/stations.json')).json()).stations.find(
+                        station => station.url_resolved.startsWith('https://')).stationuuid""")
+                    before = page.evaluate('window.mediaStarts')
+                    picker.select_option(uuid)
+                    assert page.evaluate('window.mediaStarts') == before
+                    listen = page.locator('#quick-listen button')
+                    assert listen.evaluate("""e => {const r=e.getBoundingClientRect(); return r.top>=0 && r.bottom<=innerHeight &&
+                        e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));}""")
+                    listen.click()
+                    assert page.evaluate('window.mediaStarts') == before + 1
+                    assert page.locator('#playing-title').inner_text() in picker.locator('option:checked').inner_text()
+                    page.locator('#stop').click()
+                    assert not page.locator('#audio').get_attribute('src')
                 check_accessibility(page, 'mobile shelf')
                 page.screenshot(path=str(screenshots/'mobile.png'), full_page=True)
                 assert not errors, errors

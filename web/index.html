@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Internet Radio Station Directory · CoolCode</title><meta name="description" content="{{DESCRIPTION}}"><meta name="color-scheme" content="light">
-<link rel="stylesheet" href="./style.css?v=accessibility-1">
+<link rel="stylesheet" href="./style.css?v=station-picker-1">
 {{VISIT_COUNTER}}
-<script type="module" src="./app.mjs?v=accessibility-1"></script>
+<script type="module" src="./app.mjs?v=station-picker-1"></script>
 <meta name="application-name" content="{{TITLE}}">
 <link rel="canonical" href="https://coolcode.ca/streamatlas/">
 </head>
@@ -14,7 +14,13 @@
 <header class="topbar"><a class="brand" href="https://coolcode.ca/">CoolCode<span>.ca</span></a><a href="#about">Sources & listening notes <span aria-hidden="true">↗</span></a></header>
 <main>
 <section class="hero" aria-labelledby="title">
-<div><p class="eyebrow"><span class="signal-dot"></span> OPEN FREQUENCIES / WORLDWIDE</p><h1 id="title">Stream<span>Atlas.</span></h1><p class="intro">A different place.<br>A familiar sound.</p><p class="hero-description">Find independent voices, local airwaves and late-night discoveries. Tune in from Canada to everywhere.</p></div>
+<div class="hero-copy"><h1 id="title">Stream<span>Atlas.</span></h1>
+<p class="intro">Listen to radio from around the world.</p>
+<div class="station-start">
+  <label for="quick-station">Choose a station</label>
+  <div class="quick-row"><select id="quick-station" disabled><option>Loading stations…</option></select><span id="quick-listen"></span></div>
+  <a href="#name">Search the directory by name, country or genre</a>
+</div></div>
 <div class="radio-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit orbit-three"></div><div class="art-center">SA<span>LISTEN FURTHER</span></div><div class="art-coordinate top">49.10° N / 122.66° W</div><div class="art-coordinate bottom">44.65° N / 63.57° W</div><span class="art-marker marker-a"></span><span class="art-marker marker-b"></span><div class="frequency-bars"></div></div>
 </section>
 <section class="explorer" aria-labelledby="search-title">

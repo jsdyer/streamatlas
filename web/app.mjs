@@ -64,6 +64,34 @@ $('audio').addEventListener('waiting', () => { if (active) $('playing-status').t
 $('audio').addEventListener('pause', () => { if (active) { $('player-label').textContent = 'PAUSED'; $('playing-status').textContent = 'Press the player’s Play button to resume, or Stop to disconnect.'; } });
 $('audio').addEventListener('error', () => { if (active) { $('player-label').textContent = 'STREAM UNAVAILABLE'; $('playing-status').textContent = 'The stream failed. Press its Play button to retry, or open the station website. The stream may be offline, region-restricted or unsupported by this browser.'; } });
 $('stop').addEventListener('click', stop);
+function listenControl(station) {
+  if (webURL(station.url_resolved, true)) {
+    const button = el('button', '▶  Play', 'play');
+    button.type = 'button';
+    button.setAttribute('aria-label', `Play ${station.name}`);
+    button.addEventListener('click', () => play(station));
+    return button;
+  }
+  const external = link('Open stream ↗', station.url_resolved);
+  external.addEventListener('click', () => recordClick(station));
+  return external;
+}
+function prepareStationPicker() {
+  const picker = $('quick-station');
+  if (!retained.length) {
+    picker.replaceChildren(new Option('No stations in this edition'));
+    return;
+  }
+  picker.replaceChildren(...retained.map(station =>
+    new Option([station.name, countryLabel(station.countrycode)].filter(Boolean).join(' · '), station.stationuuid)));
+  picker.disabled = false;
+  function selectStation() {
+    const station = retained.find(row => row.stationuuid === picker.value);
+    $('quick-listen').replaceChildren(listenControl(station));
+  }
+  selectStation();
+  picker.addEventListener('change', selectStation);
+}
 function card(station, index) {
   const node = el('article', undefined, 'station');
   const top = el('div', undefined, 'station-top');
@@ -79,11 +107,7 @@ function card(station, index) {
   else if (station.hls) node.append(el('p', 'HLS stream · browser support varies', 'http-note'));
   const foot = el('div', undefined, 'station-foot');
   foot.append(el('span', [station.codec || 'Unknown codec', station.bitrate ? `${station.bitrate} kbps` : 'Bitrate unlisted'].join(' / '), 'stream-tech'));
-  if (secure) {
-    const button = el('button', '▶  Play', 'play'); button.setAttribute('aria-label', `Play ${station.name}`); button.addEventListener('click', () => play(station)); foot.append(button);
-  } else {
-    const external = link('Open stream ↗', station.url_resolved); external.addEventListener('click', () => recordClick(station)); foot.append(external);
-  }
+  foot.append(listenControl(station));
   node.append(foot);
   const actions = el('div', undefined, 'station-actions');
   const isSaved = saved.some(s => s.stationuuid === station.stationuuid);
@@ -172,7 +196,7 @@ async function start() {
     $('countrycode').value = config.defaultCountry || '';
     for (const code of config.countrySuggestions) { const option = el('option', countryLabel(code)); option.value = code; $('countries').append(option); }
     for (const preset of config.presets) { const button = el('button', preset.label); button.addEventListener('click', () => { applyPreset(preset); search(); }); $('presets').append(button); }
-    restore(); render();
-  } catch(error) { status(error.message, true); $('search-button').disabled = true; $('capture-note').textContent = 'The local starting collection is unavailable. You can still open Radio Browser directly.'; }
+    prepareStationPicker(); restore(); render();
+  } catch(error) { status(error.message, true); $('quick-station').replaceChildren(new Option('Stations unavailable')); $('search-button').disabled = true; $('capture-note').textContent = 'The local starting collection is unavailable. You can still open Radio Browser directly.'; }
 }
 start();
