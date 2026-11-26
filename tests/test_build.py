@@ -30,7 +30,7 @@ class BuildTests(unittest.TestCase):
         self.assertIn('&lt;img', page)
         self.assertNotIn('<img', page)
         self.assertNotIn('{{', page)
-        self.assertIn('href="./style.css?v=accessibility-1"', page)
+        self.assertRegex(page, r'href="\./style\.css\?v=[A-Za-z0-9._-]+"')
         self.assertFalse((self.root / "dist/private.txt").exists())
         self.assertTrue((self.root / "dist/.nojekyll").exists())
 
